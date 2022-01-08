@@ -1,9 +1,13 @@
 # README
 
+pax Android学习文档记录
+
 # docs
 
 NO.|文件名称|摘要
 :--:|:--|:--
+0009| [kernel_function](docs/0009_kernel_function/README.md) | kernel驱动分析
+0008| [Android功耗问题记录](docs/0008_Android功耗问题记录/README.md) | Pax Android功耗问题分析
 0007| [bug_fix](docs/0007_bug_fix/README.md) | Pax Misc Bug分析
 0006| [R15_function](docs/0006_R15_function/README.md) | R15功能
 0005| [camera_tunning](docs/0005_camera_tunning/README.md) | camera tunning记录
