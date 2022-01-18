@@ -32,3 +32,7 @@ RSSI（Received Signal StrengthIndicator接收信号强度指示)：UE探测带�
 
 SNR是signal to noise ratio的缩写，即信噪比，它指规定条件下测得的有用信号电平与电磁噪声电平之间的比值。在任意点上有用信号的幅度与同一点上噪声信号的幅度之比，并用分贝(dB)表示。峰值与脉冲噪声相联系，有效值则与随机噪声相联系。
  一般是越大越好。
+
+ ### MTK信号强度定义
+
+ [MTK_Android11各制式信号格数判断标准.pdf](refer/MTK_Android11各制式信号格数判断标准.pdf)
