@@ -6,6 +6,14 @@ LTE ATTACH流程
 
 * [LTE ATTACH流程](https://blog.csdn.net/qq_35427437/article/details/117395391?spm=1001.2014.3001.5501)
 
+* [EMM中attach和TAU流程总结](https://wenku.baidu.com/view/fb5474be960590c69ec37678.html)
+
+## 流程图
+
+![0005_流程图1.png](images/0005_流程图1.png)
+
+![0005_流程图2.png](images/0005_流程图2.png)
+
 ## Attac功能描述
 
 向EPC注册EPS业务或non-EPS服务；
