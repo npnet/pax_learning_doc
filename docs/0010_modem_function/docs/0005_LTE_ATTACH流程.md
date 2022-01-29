@@ -8,6 +8,8 @@ LTE ATTACH流程
 
 * [EMM中attach和TAU流程总结](https://wenku.baidu.com/view/fb5474be960590c69ec37678.html)
 
+* [SW > Modem-Protocol > Network Search](https://online.mediatek.com/Pages/eCourse.aspx?001=002&002=002012&003=002012003)
+
 ## 流程图
 
 ![0005_流程图1.png](images/0005_流程图1.png)

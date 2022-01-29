@@ -10,6 +10,14 @@ Sensor Hub，中文名：传感器控制中心。
 
 * [Sensor Hub](https://www.pianshen.com/article/54461100687/)
 
+* [[FAQ22932] [VTS10R3]VtsHalSensorsV2_0Target#SensorsHidlTest.FlushSensor(default)_32bit fail](https://online.mediatek.com/FAQ#/SW/FAQ22932)
+
+* [[MT6771][Q0]BMI160 sensorhub驱动代码申请](https://eservice.mediatek.com/eservice-portal/issue_manager/update/85663815)
+
+* [[FAQ13856] [sensorhub]MT6752/32平台sensor hub介绍](https://online.mediatek.com/FAQ#/SW/FAQ13856)
+
+* [MT6762平台 R版本accgyro sensorhub调试问题](https://eservice.mediatek.com/eservice-portal/issue_manager/update/98358431)
+
 ## 应用场景
 
 而概括地看，Sensor Hub可以执行以下操作：
