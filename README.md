@@ -6,6 +6,7 @@ pax Android学习文档记录
 
 NO.|文件名称|摘要
 :--:|:--|:--
+0012| [system_stability](docs/0012_system_stability/README.md) | kernel驱动分析
 0011| [sensor_function](docs/0011_sensor_function/README.md) | kernel驱动分析
 0010| [modem_function](docs/0010_modem_function/README.md) | modem底层分析
 0009| [kernel_function](docs/0009_kernel_function/README.md) | kernel驱动分析
