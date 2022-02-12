@@ -121,3 +121,6 @@ ADB logcat is able to output SCP log directly from ADB or UART console.
 
 - 3.while true; do cat /dev/scp;done
 
+
+### 抬起亮屏功能调试
+
