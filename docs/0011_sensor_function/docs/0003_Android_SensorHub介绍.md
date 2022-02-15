@@ -115,12 +115,6 @@ ADB logcat is able to output SCP log directly from ADB or UART console.
 
 - 1.先关闭mtklogger记录：
 
-![0003_1.png](images/0003_1.png)
-
 - 2.输入`echo 1 > /sys/class/misc/scp/scp_mobile_log`.
 
 - 3.while true; do cat /dev/scp;done
-
-
-### 抬起亮屏功能调试
-

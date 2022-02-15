@@ -1,11 +1,12 @@
 # README
 
-kernel驱动分析
+Android各种sensor软件分析
 
 ## docs
 
 NO.|文件名称|摘要
 :--:|:--|:--
+0007| [Sensor架构介绍](docs/0007_Sensor架构介绍.md) | Sensor架构介绍
 0006| [Sensor原理说明](docs/0006_Sensor原理说明.md) | 介绍传感器原理
 0005| [Sensor硬件汇总](docs/0005_Sensor硬件汇总.md) | Sensor型号汇总
 0004| [Sensor_Kernel_sc7a20分析](docs/0004_Sensor_Kernel_sc7a20分析.md) | Accel Sensor 驱动分析

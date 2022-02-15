@@ -32,3 +32,13 @@
 
 ![0001_ett.png](images/0001_ett.png)
 
+烧录后发现无打印，咨询MTK后，发现串口TX/RX实际电压为1.8v，因为下载`MT6765_ETT-enc_KMDX60018M_B425_RELEASE.bin`后并没有打开3.3v电平转换开关，我们用的3.3v串口，电平不匹配，原理图如下，需要硬件打开以下两个供电：
+
+IO_3V3(GPIO_EXT1 B:GPIO164)需要打开：
+
+![0001_IO3.3.png](images/0001_IO3.3.png)
+
+GPIO_EXT8 B:GPIO171 串口电平转换：
+
+![0001_1.8-3.3.png](images/0001_1.8-3.3.png)
+
