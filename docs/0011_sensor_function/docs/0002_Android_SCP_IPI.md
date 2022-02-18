@@ -155,6 +155,50 @@ Inter-Processor Communication (IPC) and Inter-Processor Interrupt (IPI)
                 * enum scp_ipi_status scp_ipi_send(enum ipi_id id, void *buf, unsigned int  len, unsigned int wait, enum scp_core_id scp_id)
 ```
 
+其中发送IPI请求主要函数为`sensor_set_cmd_to_hub`:
+
+```c++
+enum CUST_ACTION {
+	CUST_ACTION_SET_CUST = 1,
+	CUST_ACTION_SET_CALI,
+	CUST_ACTION_RESET_CALI,
+	CUST_ACTION_SET_TRACE,
+	CUST_ACTION_SET_DIRECTION,
+	CUST_ACTION_SHOW_REG,
+	CUST_ACTION_GET_RAW_DATA,
+	CUST_ACTION_SET_PS_THRESHOLD,
+	CUST_ACTION_SHOW_ALSLV,
+	CUST_ACTION_SHOW_ALSVAL,
+	CUST_ACTION_SET_FACTORY,
+	CUST_ACTION_GET_SENSOR_INFO,
+};
+
+int sensor_set_cmd_to_hub(uint8_t sensorType,
+	enum CUST_ACTION action, void *data)
+{
+	union SCP_SENSOR_HUB_DATA req;
+	int len = 0, err = 0;
+	struct SCP_SENSOR_HUB_GET_RAW_DATA *pGetRawData;
+
+	req.get_data_req.sensorType = sensorType;
+	req.get_data_req.action = SENSOR_HUB_SET_CUST;
+
+	if (atomic_read(&power_status) == SENSOR_POWER_DOWN) {
+		pr_err("scp power down, we can not access scp\n");
+		return -1;
+	}
+
+	switch (sensorType) {
+	case ID_ACCELEROMETER:
+		req.set_cust_req.sensorType = ID_ACCELEROMETER;
+		req.set_cust_req.action = SENSOR_HUB_SET_CUST;
+		switch (action) {
+		case CUST_ACTION_RESET_CALI:
+
+       ...省略...
+```
+
+
 ## SCP contexthub处理IPI请求
 
 在SCP这边，不管是nanohub，还是sensorhub，都是contexthub
@@ -179,6 +223,52 @@ Inter-Processor Communication (IPC) and Inter-Processor Interrupt (IPI)
                             * ret = contextHubDispatchCust(mtkTypeToChreType(mtkType), set_cust_req);
                     * ret = cmd->handler(&mTask.ipi_req, &data);
                     * ret = contextHubIpiRxAck(cmd, &mTask.ipi_req, &data, ret);
+```
+
+其中处理IPI请求主要函数是`contextHubDispatchCust`：
+
+```c
+typedef enum {
+    CUST_ACTION_SET_CUST = 1,
+    CUST_ACTION_SET_CALI,
+    CUST_ACTION_RESET_CALI,
+    CUST_ACTION_SET_TRACE,
+    CUST_ACTION_SET_DIRECTION,
+    CUST_ACTION_SHOW_REG,
+    CUST_ACTION_GET_RAW_DATA,
+    CUST_ACTION_SET_PS_THRESHOLD,
+    CUST_ACTION_SHOW_ALSLV,
+    CUST_ACTION_SHOW_ALSVAL,
+    CUST_ACTION_SET_FACTORY,
+    CUST_ACTION_GET_SENSOR_INFO,
+} CUST_ACTION;
+
+static int contextHubDispatchCust(uint8_t sensType, SCP_SENSOR_HUB_SET_CUST_REQ *req)
+{
+    int ret = 0;
+    CUST_SET_REQ_P cust_req = &req->cust_set_req;
+
+    switch (cust_req->cust.action) {
+        case CUST_ACTION_SET_CALI:
+            ret = sensorCoreWriteCalibration(sensType, cust_req->setCali.int32_data);
+            break;
+        case CUST_ACTION_RESET_CALI:
+            ret = sensorCoreResetCalibration(sensType);
+            break;
+        case CUST_ACTION_SET_PS_THRESHOLD:
+            ret = sensorCoreSetThreshold(sensType, cust_req->setPSThreshold.threshold);
+            break;
+        case CUST_ACTION_SET_TRACE:
+            ret = sensorCoreSetDebugTrace(sensType, cust_req->setTrace.trace);
+            break;
+        case CUST_ACTION_GET_SENSOR_INFO:
+            ret = sensorCoreGetSensorInfo(sensType, &cust_req->getInfo.sensorInfo);
+            break;
+        default:
+            break;
+    }
+    return ret;
+}
 ```
 
 ## sensorhub nanohub IPI通信验证

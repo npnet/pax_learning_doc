@@ -40,68 +40,7 @@ Sensor Hub，中文名：传感器控制中心。
 
 　　5.室内定位/室内导航：室外定位目前主要是GPS+AGPS。AGPS是通过手机附近的基站获取GPS辅助信息（包含GPS的星历和方位俯仰角等），从而帮助GPS快速，准确定位。在GPS信号不强的情况下，手机也可以通过多个手机基站进行定位。
 
-## debug调试
 
-* sensorhub调通后，scp打印如下：
-
-```log
------ timezone:Asia/Shanghai
-8 overlay remap fail
-
-[0.017]contexthub_fw_start tid: 268
-
-[0.017]accGyro: app start
-
-[0.017]sc7a20ResetRead
-
-[0.017]alsps: app start
-
-[0.017]initSensors:   not ready!
-
-[0.017]LIFT EVT_APP_START
-
-[0.017]TILT EVT_APP_START
-
-[0.017]STEP_RECOGNITION EVT_APP_START
-
-[0.017]alsPs: init done
-
-[0.017]read before sc7a20ResetWrite
-
-[0.028]sc7a20DeviceId
-
-[0.028]sc7a20 acc reso: 0, sensitivity: 1024
-
-[0.028]sc7a20RegisterCore deviceId 0x11
-
-
-[0.028]accGyro: init done
-
-[0.518]initSensors: alloc blocks number:219
-
-[0.520]get dram phy addr=0x8d000000,size=1048520, maxEventNumber:23830
-
-[0.520]get dram phy rp=0,wp=0
-
-[2.029]frequency request: 65535 MHz => 250 MHz
-
-[2.829]sync time scp:2829537083, ap:4316042615, offset:1486968532
-
-[8.765]hostintf: 8765761097, chreType:1, rate:0, latency:0, cmd:3!
-
-[8.765]sensorCfgAcc:
-
-[8.765]bias: 0.000000, 0.000000, 0.000000
-
-[8.765]cali: 0, 0, 0
-
-[8.765][MPEKlib]: MPE_CAL_A_VER_18082801
-
-[8.765]sc7a20AccCfgCali: cfgData[0]:0, cfgData[1]:0, cfgData[2]:0
-
-[8.765]acc: cfg done
-
-```
 
 * 如何实时打印scp log。
 
@@ -118,3 +57,90 @@ ADB logcat is able to output SCP log directly from ADB or UART console.
 - 2.输入`echo 1 > /sys/class/misc/scp/scp_mobile_log`.
 
 - 3.while true; do cat /dev/scp;done
+
+## SCP介绍
+
+SCP （ Tinysys） 协处理器，负责 sensor ， audio 的相关 feature，以及可以扩客户私有的 feature。
+MTK SCP 的 系统选用的是 FreeRTOS， 其中 CHRE 是 FreeRTOS 的一个 Task 专门处理 Sensor 相关
+数据。 Audio feature 直接基于 FreeRTOS 进行实作。
+
+![0003_SCP夹头图.png](images/0003_SCP夹头图.png)
+
+### 1.Folder Structure
+
+![0003_文件结构.png](images/0003_文件结构.png)
+
+* 1. Platform Configuration file
+
+> Required LDFLAGS, headers or C files of the platform Default configurations of the platform
+
+路径： project/$(PROCESSOR)/$(PLATFORM)/platform/platform.mk
+如下图：
+
+![0003_project.png](images/0003_project.png)
+
+* 2. Project Configuration file
+
+> ProjectConfig.mk will overwriting options in platform.mk
+
+![0003_proj.png](images/0003_proj.png)
+
+### 2.SCP code size 限制机制
+
+* Setting.ini 格式说明
+
+![0003_geshi.png](images/0003_geshi.png)
+
+* `project/CM4_A/mt6765/platform/Setting.ini`含义就是`Physical Sensor`是sensor所有的size大小，其中包括alsps、accGyro、auto_cali、barometer、magnetometer这几个的总和:
+
+```
+magnetometer:Physical Sensor:magnetometer
+baro:Physical Sensor:barometer
+auto_cali:Physical Sensor:auto_cali
+alsps:Physical Sensor:alsps
+accelerometer:Physical Sensor:accGyro
+accGyro:Physical Sensor:accGyro
+
+Physical Sensor:95000
+
+alsps:18000
+accGyro:27000
+auto_cali:19400
+barometer:14500
+magnetometer:30000
+```
+
+### 3.CHRE sensors introduction
+
+SCP 下面的， MTK sensor hub feature 基于 Google CHRE 架构实现.
+CHRE (Context Hub Runtime Environment) 是一个事件驱动的架构，也可以作为独立的 OS。
+黄色部分是 Event Queue， CHRE 只有一个 while 去处理排在头部的 Event Queue，这里没有优先级的
+概念， Event Queue 的处理是先来先服务， 只有 interrupt 可以打断当前的 Event Queue 处理。 CHRE
+默认有 512 个 Event Queue。 设计的目的是实时，且轻量级，所以 EventQueue 内部代码必须很快跑
+完。
+CHRE 内部实现的 driver，即用来处理事件的代码 Google 称之为 nano hub app。后面讲详细解释如何
+写一个 nano hub app
+CHRE 消息机制简要做如下图示：
+
+![0003_CHRE.png](images/0003_CHRE.png)
+
+### 4.MTK CHRE Sensors Common Layer
+
+为避免客户 porting 时间过长，已经出现 bug 不好查找， MTK 将物理 sensor 的逻辑部分抽出了单独的
+一层叫做 sensorFSM。 和硬件相关的部分单独写成一份代码，提供给 sensorFSM 调用。 框架如下：
+
+![0003_CHRE框架.png](images/0003_CHRE框架.png)
+
+* 拆出 common 层后，客户需要实现的是：
+    - Init 相关（加载客制化， auto detect 等)
+    - 实现有限个 sensorFSM
+    - 实现 SensorCoreInfo
+
+### 5.Sensor driver overlay
+
+Purpose: 客户开案需要二供料件。 同一个类型的 sensor 会选择两家厂商的供货， 如果同时在 SCP 写两个 driver 进行 auto detect 会占用 SCP 的 SRAM，因此选择将所有支持的driver 先放在 DRAM 中，当匹配上ID后，开机启动SCP时，将从DRAM->SRAM load.
+
+![0003_overlay.png](images/0003_overlay.png)
+
+### 6.common driver及alsps driver软件流程分析
+

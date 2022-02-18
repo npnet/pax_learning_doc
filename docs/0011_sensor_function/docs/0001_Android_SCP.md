@@ -39,7 +39,7 @@ SCP(Sensor-hub Control Processor)，CHRE(Context Hub Runtime Environment), Syste
   * middleware/contexthub/MEMS_Driver/accGyro/lis2hh12.c
     ```
     * int lis2hh12Init(void)
-      * mTask.hw = get_cust_accGyro("lis2hh12");
+      * mTask.hw = get_cust_accGyro("lis2hh12");  获取客制化信息
     * MODULE_DECLARE(lis2hh12, SENS_TYPE_ACCEL, lis2hh12Init);
     ```
   * project/CM4_A/mt6765/platform/feature_config/chre.mk
@@ -96,18 +96,23 @@ SCP(Sensor-hub Control Processor)，CHRE(Context Hub Runtime Environment), Syste
       }
   }
   ```
+
+
 * vendor/mediatek/proprietary/tinysys/freertos/source/middleware/contexthub/MEMS_Driver/accGyro/accGyro.c
   ```CPP
+  project/CM4_A/mt6765/k62v1_64_pax_eea/ProjectConfig.mk
+  34:CFG_OVERLAY_INIT_SUPPORT = yes
+
   static bool startTask(uint32_t taskId)
   {
   // ...省略
   
-  #ifndef CFG_OVERLAY_INIT_SUPPORT
+  #ifndef CFG_OVERLAY_INIT_SUPPORT  
       /* Register sensor fsm last */
       module_init(SENS_TYPE_ACCEL);
   #else
       extern void accGyroOverlayRemap(void);
-      accGyroOverlayRemap();
+      accGyroOverlayRemap();  跑这里
   #endif
   
       return true;

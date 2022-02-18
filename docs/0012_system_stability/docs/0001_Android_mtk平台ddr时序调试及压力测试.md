@@ -28,6 +28,8 @@
 
 ### 2.测试过程
 
+#### 1.烧录bin无打印问题分析
+
 * 组合键Ctrl+Alt+A调出flash tool的brom Adapter选择ETT bin设置start address(0x204000)勾上Jump点击download；
 
 ![0001_ett.png](images/0001_ett.png)
@@ -42,3 +44,12 @@ GPIO_EXT8 B:GPIO171 串口电平转换：
 
 ![0001_1.8-3.3.png](images/0001_1.8-3.3.png)
 
+#### 2.Vdram电平为0问题
+
+(Vcore NV, Vdram NV, Vddq NV)
+
+1.经测量Vcore 和Vddq 是正常的，但是无法调高调低。
+
+2.vdram量出来是0，量的是MT6357 H17 vdram脚，不知道什么原因。
+
+3.按照文档MT6765_62 ETT & stress test reference for LP4X V1.6.pdf操作，EET测试了10几分钟，卡住了
