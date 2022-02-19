@@ -227,3 +227,4 @@ sensors.cpp
                 * AccelerationSensor::processEvent()                //事件处理与校正，上面获取到的*event数据,将(sensor_event *event)转换成(sensors_event_t mPendingEvent)
                     * SensorEventCircularReader::next()             //获取下一次的数据
 ```
+

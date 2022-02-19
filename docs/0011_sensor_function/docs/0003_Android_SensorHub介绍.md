@@ -144,3 +144,116 @@ Purpose: 客户开案需要二供料件。 同一个类型的 sensor 会选择�
 
 ### 6.common driver及alsps driver软件流程分析
 
+每种类型的sensor都是一个标准的`CHRE APP`，包括初始化中的`overlayremap`和消息处理函数`handleEvent`，以alsps为例：
+
+```C++
+alsps.c:
+
+* INTERNAL_APP_INIT(APP_ID_MAKE(APP_ID_VENDOR_MTK, MTK_APP_ID_WRAP(SENS_TYPE_ALS, 0, 0)), 0, startTask, endTask,handleEvent);
+  * alspsOverlayRemap();
+    * ltr553Init(void)
+      * mTask.deviceId == 0x92
+      * registerAlsPsDriverFsm(ltr553Fsm, ARRAY_SIZE(ltr553Fsm));
+        * osEnqueuePrivateEvt(EVT_APP_START, NULL, NULL, mTask.id);
+          * handleEvent(uint32_t evtType, const void* evtData)
+            * sensorFsmRunState(NULL, &mTask.fsm, (const void *)CHIP_RESET, &i2cCallback, &spiCallback);  //重要，运行CHIP_RESET FSM函数。
+```
+
+* 具体流程：
+
+```C++
+1.开始任务，overlay哪个sensor，另外注意ltr553Init是无法在scp里面打印出来的，可能是因为在DRAM里面跑的：
+static bool startTask(uint32_t taskId)
+{
+    alspsOverlayRemap();
+    alspsSecondaryOverlayRemap();  这里是两个传感器哈
+}
+
+参考0001_Android_SCP.md可以知道就是根据Projectconfig.mk里面配置的型号去map,比如定义了553就会跑ltr553Init函数：
+MODULE_DECLARE(ltr553, SENS_TYPE_ALS, ltr553Init);
+
+2.ltr553Init函数主要是匹配ID，填充mSensorInfo和mSensorOps包括sensorPower、sensorSetRate、sensorFlush、sensorCalibrate、sensorCfgData等接口，供上层调用：
+static int ltr553Init(void) {
+
+    mTask.txBuf[0] = LTR553_PART_ID;
+    ret = i2cMasterTxRxSync(mTask.hw->i2c_num, mTask.i2c_addr, mTask.txBuf, 1,
+                            &mTask.deviceId, 1, NULL, NULL);
+
+	if (mTask.deviceId == 0x92) {  // ltr553 device id is fixed
+        goto success_out;
+    } else {
+        i2cMasterRelease(mTask.hw->i2c_num);
+        osLog(LOG_ERROR, "ltr553: read id fail!!!\n");
+        ret = -1;
+        goto err_out;
+    }
+
+success_out:
+    osLog(LOG_INFO, "ltr553: auto detect success:0x%x\n", mTask.deviceId);
+    alsSensorRegister();
+      * sensorRegister(&mSensorInfo[ALS], &mSensorOps[ALS], NULL, false);
+    psSensorRegister();
+    registerAlsPsDriverFsm(ltr553Fsm, ARRAY_SIZE(ltr553Fsm));
+}
+
+3.注册完FSM函数列表后，发送EVT_APP_START event时间处理：
+void registerAlsPsDriverFsm(struct sensorFsm *mSensorFsm, uint8_t size)
+{
+    mTask.fsm.moduleName = "alsps";
+    mTask.fsm.mSensorFsm = mSensorFsm;
+    mTask.fsm.mSensorFsmSize = size;
+    osEnqueuePrivateEvt(EVT_APP_START, NULL, NULL, mTask.id);
+}
+static void handleEvent(uint32_t evtType, const void* evtData)
+{
+    struct transferDataInfo dataInfo;
+
+    switch (evtType) {
+        case EVT_APP_START: {
+        sensorFsmRunState(NULL, &mTask.fsm, (const void *)CHIP_RESET, &i2cCallback, &spiCallback);
+        }
+}
+
+4.执行运行CHIP_RESET FSM函数，这里将会都跑一遍。
+    /* init state */
+    sensorFsmCmd(STATE_RESET, STATE_SET_SW_RST, ltr553_set_sw_reset),
+    sensorFsmCmd(STATE_SET_SW_RST, STATE_SET_ALSPS_SETTING, ltr553_set_alsps_setting),
+	sensorFsmCmd(STATE_SET_ALSPS_SETTING, STATE_SET_INT_CFG, ltr553_set_int_cfg),
+	sensorFsmCmd(STATE_SET_INT_CFG, STATE_SET_INT_PERSIST, ltr553_set_int_persist),
+    sensorFsmCmd(STATE_SET_INT_PERSIST, STATE_SET_PS_THDH, ltr553_set_alsps_ctrl),
+    sensorFsmCmd(STATE_SET_PS_THDH, STATE_SET_PS_THDL, ltr553_set_ps_thdh),
+    sensorFsmCmd(STATE_SET_PS_THDL, STATE_SETUP_EINT, ltr553_set_ps_thdl),
+    sensorFsmCmd(STATE_SETUP_EINT, STATE_CORE, ltr553_setup_eint),
+    sensorFsmCmd(STATE_CORE, STATE_INIT_DONE, ltr553_register_core),
+
+5.最后执行STATE_INIT_DONE函数
+* handleSensorEvent(const void *state)
+  * case CHIP_INIT_DONE: 
+  * processPendingEvt();
+    * mSensorOps[handle].sensorCfgData(mTask.mSensorPerUnit[handle].pendCaliCfg,(void *)handle);
+
+这里主要执行了sensorCfgPs函数：
+```
+
+* 所有打印：
+```log
+[0.019]alsps: app start
+[0.019]ltr553_set_alsps_setting =====>
+[0.030]ltr553_set_int_cfg =====>
+
+[0.030]ltr553_set_int_persist =====>
+[0.030]ltr553_set_alsps_ctrl =====>
+[0.031]ltr553_set_ps_thdh =====>
+[0.031]ltr553_set_ps_thdl =====>
+[0.031]ltr553_setup_eint =====>
+[0.031]ltr553_register_core =====>
+[0.031]alsPs: init done
+
+[7.749]sensorCfgPs [high, low]: [0, 0]
+
+[7.749]ltr553_ps_cfg =====>
+[7.749]ltr553_ps_cfg, [high, low]: [0, 0]
+
+[7.749]ltr553_ps_set_threshold =====>
+[7.749]ps: cfg done
+```

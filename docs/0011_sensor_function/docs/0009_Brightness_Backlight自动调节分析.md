@@ -4,8 +4,8 @@
 
 ## 参考文档
 
-* [0368_Android_Auto_Brightness.md](0368_Android_Auto_Brightness.md)
-* [0434_A_Manual_Backlight.md](0434_A_Manual_Backlight.md)
+* [0368_Android_Auto_Brightness.md](0010_Android_Auto_Brightness)
+* [0434_A_Manual_Backlight.md](0011_A_Manual_Backlight.md)
 
 ## config
 
