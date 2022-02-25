@@ -296,7 +296,7 @@ List<Sensor> deviceSensors = mSensorManager.getSensorList(Sensor.TYPE_ALL);
 ## 四、地磁传感器（magnetometer）
 磁力传感器简称为M-sensor，返回x、y、z三轴的环境磁场数据。
 
-该数值的单位是微特斯拉（micro-Tesla），用uT表示。 单位也可以是高斯（Gauss），1Tesla=10000Gauss。 硬件上一般没有独立的磁力传感器，磁力数据由电子罗盘传感器提供（E-compass）。
+该数值的单位是微特斯拉（micro-Tesla），用uT表示。 单位也可以是高斯（Gauss），1Tesla=10000Gauss。1Gauss = 100uT,硬件上一般没有独立的磁力传感器，磁力数据由电子罗盘传感器提供（E-compass）。
 
 电子罗盘传感器同时提供下文的方向传感器数据。
 

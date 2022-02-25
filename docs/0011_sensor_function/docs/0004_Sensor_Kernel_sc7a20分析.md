@@ -152,109 +152,67 @@ int sc7a20Init(void)
 OVERLAY_DECLARE(sc7a20, OVERLAY_WORK_00, sc7a20Init);
 ```
 
-## 校准流程
-
-* 根据打印，因为只有acc校准，所以只做了acc的`sensorCaliAcc`函数，其他的都未执行，先了解一下acc校准方法：
-
-1.点击Item Test进入如下界面， 按音量下键选择相应的sensor测试类型，即可对相应sensor进行校准测试：
-
-![0004_12312.png](images/0004_12312.png)
-
-2.例如选择G-sensor Cali，首先clear cali data，然后做20%或者40%测试，若显示Cali done则表示校准成功：
-
-![0004_123.png](images/0004_123.png)
-
-3.选择G-sensor 测试项测试，看校准后数据是否OK，若为pass则表示通过：
-
-![0004_123123.png](images/0004_123123.png)
-
-4.校准流程：
-
-![0004_流程.png](images/0004_流程.png)
-
-* 开机读取校准数据logcat 打印如下：
-
-```log
-02-17 13:03:49.250078   724   724 D Accelerometer: misc path =/sys/class/sensor/m_acc_misc/
-02-17 13:03:49.250491   724   724 I Accelerometer: read div buf(/sys/class/sensor/m_acc_misc/accactive), mdiv 1000
-02-17 13:03:49.268059   724   724 I Accelerometer: read bias: [0.000000, 0.000000, 0.000000]
-02-17 13:03:49.268944   724   724 I Accelerometer: read cali: [240, -111, 199]
-```
-
-* 校准数据读取节点：
-```log
-130|PAYPHONEM50:/ # cat /mnt/vendor/nvcfg/sensor/gyro_temp.json
-{
-  "gyro_temp": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-    ]
-```
-
-* 工厂模式校准失败，根据错误打印`gsensor_get_cali: get_cali err: -1`，看看是哪个文件权限有问题：
-
-```log
-02-19 17:10:08.501   460   570 D HWMLIB  : ----------------------------------------------------------------
-02-19 17:10:08.501   460   570 D HWMLIB  :                          Calibration Data
-02-19 17:10:08.502   460   570 D HWMLIB  : ----------------------------------------------------------------
-02-19 17:10:08.502   460   570 D HWMLIB  : maxdiff =   +3.9227
-02-19 17:10:08.502   460   570 D HWMLIB  : average =   +0.4361,   +0.0192   +9.4192
-02-19 17:10:08.502   460   570 D HWMLIB  : ----------------------------------------------------------------
-02-19 17:10:08.502   460   570 D HWMLIB  : [  317275] (  +0.4330,   +0.0350,   +9.3640)
-02-19 17:10:08.502   460   570 D HWMLIB  : [  317326] (  +0.4420,   +0.0070,   +9.3950)
-02-19 17:10:08.502   460   570 D HWMLIB  : [  317378] (  +0.4380,   +0.0330,   +9.4330)
-02-19 17:10:08.502   460   570 D HWMLIB  : [  317430] (  +0.4420,   -0.0070,   +9.4330)
-02-19 17:10:08.502   460   570 D HWMLIB  : [  317481] (  +0.4020,   +0.0450,   +9.3800)
-02-19 17:10:08.502   460   570 D HWMLIB  : [  317532] (  +0.4570,   +0.0040,   +9.4710)
-02-19 17:10:08.503   460   570 D HWMLIB  : [  317584] (  +0.4140,   +0.0260,   +9.3880)
-02-19 17:10:08.503   460   570 D HWMLIB  : [  317636] (  +0.4230,   +0.0380,   +9.3970)
-02-19 17:10:08.503   460   570 D HWMLIB  : [  317687] (  +0.4350,   +0.0040,   +9.4260)
-02-19 17:10:08.503   460   570 D HWMLIB  : [  317739] (  +0.4710,   +0.0070,   +9.3970)
-02-19 17:10:08.503   460   570 D HWMLIB  : [  317789] (  +0.4540,   +0.0830,   +9.4520)
-02-19 17:10:08.503   460   570 D HWMLIB  : [  317840] (  +0.4350,   +0.0000,   +9.4140)
-02-19 17:10:08.503   460   570 D HWMLIB  : [  317891] (  +0.4330,   +0.0040,   +9.4500)
-02-19 17:10:08.503   460   570 D HWMLIB  : [  317943] (  +0.4280,   +0.0280,   +9.4160)
-02-19 17:10:08.503   460   570 D HWMLIB  : [  317994] (  +0.4230,   +0.0160,   +9.4570)
-02-19 17:10:08.503   460   570 D HWMLIB  : [  318045] (  +0.4380,   -0.0310,   +9.3880)
-02-19 17:10:08.503   460   570 D HWMLIB  : [  318095] (  +0.4620,   +0.0280,   +9.4090)
-02-19 17:10:08.503   460   570 D HWMLIB  : [  318146] (  +0.4420,   +0.0040,   +9.4620)
-02-19 17:10:08.503   460   570 D HWMLIB  : [  318198] (  +0.4380,   +0.0090,   +9.4500)
-02-19 17:10:08.504   460   570 D HWMLIB  : [  318249] (  +0.4110,   +0.0500,   +9.4020)
-02-19 17:10:08.505   460   570 D HWMLIB  : ----------------------------------------------------------------
-02-19 17:10:08.505   460   570 D HWMLIB  : X-Axis: min/avg/max = (  +0.4020,   +0.4361,   +0.4710), diverse =   -0.0035 ~   +0.0036, std =    0.0165
-02-19 17:10:08.505   460   570 D HWMLIB  : Y-Axis: min/avg/max = (  -0.0310,   +0.0192,   +0.0830), diverse =   -0.0051 ~   +0.0065, std =    0.0241
-02-19 17:10:08.505   460   570 D HWMLIB  : Z-Axis: min/avg/max = (  +9.3640,   +9.4192,   +9.4710), diverse =   -0.0056 ~   +0.0053, std =    0.0299
-02-19 17:10:08.505   460   570 D HWMLIB  : ----------------------------------------------------------------
-02-19 17:10:08.506   460   570 D HWMLIB  : calculateStandardCalibration (  -0.4361,   -0.0192,    0.3875)
-02-19 17:10:08.506   460   570 D HWMLIB  : [WD]   -0.4361   -0.0192    0.3875 =>  -436   -19   387
-02-19 17:10:11.701   460   570 E HWMLIB  : gsensor_get_cali: get_cali err: -1
-02-19 17:10:11.702   460   570 E FTM     : gs_cali_update_iv_thread [  296]: get calibration fail: (Invalid argument) -1
-02-19 17:10:11.702   460   570 D NVRAM   : fail to open /sys/class/BOOT/BOOT/boot/boot_mode:
-02-19 17:10:11.702   460   570 D NVRAM   : NVM_GetFileDesc: Open /mnt/vendor/nvdata/APCFG/APRDCL/HWMON_ACC,LID:12
-02-19 17:10:11.702   460   570 D NVRAM   : NVM_CmpFileVerNo 12
-02-19 17:10:11.702   460   570 D NVRAM   : Load File Version: 000, NvRam File Version: 000
-02-19 17:10:11.702   460   570 D NVRAM   : NVM_ProtectDataFile : 12 ++
-02-19 17:10:11.703   460   570 D NVRAM   : NVM_ProtectUserData:Check Success
-02-19 17:10:11.703   460   570 D HWMLIB  : [RN]    0.0000    0.0000    0.0000 =>     0     0     0
-02-19 17:10:11.705   460   570 D NVRAM   : NVM_CloseFileDesc: Open by Readonly, no need to check when close
-02-19 17:10:14.773   460   570 E HWMLIB  : gsensor_get_cali: get_cali err: -1
-02-19 17:10:14.773   460   570 E FTM     : gs_cali_update_info [  161]: get calibration: 22(Invalid argument)
-02-19 17:10:14.913   460   570 E FTM     : MTK_LCM_PHYSICAL_ROTATION + 0
-02-19 17:10:14.916   460   570 E FTM     : set_active_framebuffer +
-02-19 17:10:14.933   460   570 E FTM     : gr_flip done
-02-19 17:10:14.933   460   570 D FTM     : [GSC] op: 0
-02-19 17:10:14.933   460   570 D NVRAM   : fail to open /sys/class/BOOT/BOOT/boot/boot_mode:
-02-19 17:10:14.933   460   570 D NVRAM   : NVM_GetFileDesc: Open /mnt/vendor/nvdata/APCFG/APRDCL/HWMON_ACC,LID:12
-02-19 17:10:14.933   460   570 D NVRAM   : NVM_CmpFileVerNo 12
-02-19 17:10:14.934   460   570 D NVRAM   : Load File Version: 000, NvRam File Version: 000
-02-19 17:10:14.934   460   570 D NVRAM   : NVM_ProtectDataFile : 12 ++
-02-19 17:10:14.934   460   570 D NVRAM   : NVM_ProtectUserData:Check Success
-02-19 17:10:14.934   460   570 D HWMLIB  : [RN]    0.0000    0.0000    0.0000 =>     0     0     0
-02-19 17:10:14.934   460   570 D NVRAM   : NVM_CloseFileDesc: Open by Readonly, no need to check when close
-```
-
 ## 数据上报流程
+
+## 问题点分析
+
+### 1.acc上报数据很卡顿
+
+* 根据设置频率打印如下,使用AKM_sENSORmONITOR看，延时周期为62ms，频率计算为16HZ，太慢了，rate换算应该是除以1000：
+
+```log
+[10538.230]hostintf: 10538230206894, chreType:1, rate:15359,  latency:100000000, cmd:2! //设置15HZ
+[10538.230]sensorFlushAcc
+
+实际频率：
+[11144.090]sc7a20 acc1 rawdata x:-62, y:30, z:-1130
+[11144.153]sc7a20 acc1 rawdata x:-57, y:34, z:-1130  // 1/153-90 = 15.87 HZ也正常啊
+[11144.215]sc7a20 acc1 rawdata x:-53, y:36, z:-1135
+
+[11144.277]sc7a20 acc1 rawdata x:-49, y:35, z:-1134
+[11144.340]sc7a20 acc1 rawdata x:-50, y:26, z:-1135
+[11144.403]sc7a20 acc1 rawdata x:-51, y:25, z:-1138
+
+```
+
+* 进一次方向传感器后，正常了：
+
+```log
+hostintf: 283048948674, chreType:1, rate:51200, latency:0, cmd:2!
+```
+
+* 但是采用kernel驱动方式，延时周期为65ms~66ms，频率是15HZ，不卡顿，难道是频率不匹配导致？继续看看framwork如何定义频率，下面可以看到framework层定义了4中频率，分别是fastest、50HZ/15HZ/5HZ四种：
+
+* `frameworks/native/libs/sensor/SensorEventQueue.cpp`传感器采样频率,是在android注册sensor的时候，会有一个delay的时间，这个时间就是采样的频率。上层注册 API registerListener（listener, sensor,rate）rate 即为时间:
+```java
+
+status_t SensorEventQueue::enableSensor(Sensor const* sensor) const {
+    return enableSensor(sensor, SENSOR_DELAY_NORMAL);
+}
+
+class SensorEventQueue : public ASensorEventQueue, public RefBase
+{
+public:
+
+    enum { MAX_RECEIVE_BUFFER_EVENT_COUNT = 256 };
+
+    /**
+     * Typical sensor delay (sample period) in microseconds.
+     */
+    // Fastest sampling, system will bound it to minDelay
+    static constexpr int32_t SENSOR_DELAY_FASTEST = 0;
+    // Typical sample period for game, 50Hz;
+    static constexpr int32_t SENSOR_DELAY_GAME = 20000;
+    // Typical sample period for UI, 15Hz
+    static constexpr int32_t SENSOR_DELAY_UI = 66667;
+    // Default sensor sample period
+    static constexpr int32_t SENSOR_DELAY_NORMAL = 200000;
+	...省略...
+}
+```
+
+* sensorhub中定义如下：
+
+```C++
+
+```

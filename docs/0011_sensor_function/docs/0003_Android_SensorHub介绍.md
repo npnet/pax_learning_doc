@@ -58,6 +58,15 @@ ADB logcat is able to output SCP log directly from ADB or UART console.
 
 - 3.while true; do cat /dev/scp;done
 
+## 软件架构
+
+MTK Sensor 分为 AP 和 SCP 两大部分， AP (CA5x ， CA7x 系列 主芯片)， SCP（CM4） 协处理器。
+
+负责处理 Sensor 数据。实际使用中，也可以关闭 SCP 只走 AP 这路实现 sensor 功能，但是只能使用一种方式。
+
+![0003_软件架构.png](images/0003_软件架构.png)
+
+
 ## SCP介绍
 
 SCP （ Tinysys） 协处理器，负责 sensor ， audio 的相关 feature，以及可以扩客户私有的 feature。
