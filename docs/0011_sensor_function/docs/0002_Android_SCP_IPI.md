@@ -7,7 +7,7 @@ Inter-Processor Communication (IPC) and Inter-Processor Interrupt (IPI)
 
 ## 参考文档
 
-* [0331_Android_SCP.md](0331_Android_SCP.md)
+* [0001_Android_SCP.md](0001_Android_SCP.md)
 
 ## SCP使能传感器流程
 
@@ -201,7 +201,7 @@ int sensor_set_cmd_to_hub(uint8_t sensorType,
 
 ## SCP contexthub处理IPI请求
 
-在SCP这边，不管是nanohub，还是sensorhub，都是contexthub
+在SCP这边，不管是nanohub，还是sensorhub，都是contexthub，IPI事件处理函数主要是`contextHubFwHandleEvent`，处理发送和接收事件，处理完成后将用`contextHubIpiRxAck`函数向AP发送ACK。
 
 ```
 * vendor/mediatek/proprietary/tinysys/freertos/source/middleware/contexthub/contexthub_fw.c

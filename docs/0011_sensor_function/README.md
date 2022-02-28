@@ -6,6 +6,7 @@ Android各种sensor软件分析
 
 NO.|文件名称|摘要
 :--:|:--|:--
+0015| [SensorHub_虚拟传感器手势库](docs/0015_SensorHub_虚拟传感器手势库.md) | SensorHub 虚拟传感器介绍。
 0014| [SensorHub_Factory_Calibration流程](docs/0014_SensorHub_Factory_Calibration流程.md) | SensorHub工厂模式下校准流程分析。
 0013| [SensorHub产品兼容方案](docs/0013_SensorHub产品兼容方案.md) | SensorHub兼容M50、M8功能开发。
 0012| [MMC5603磁感调试过程及介绍](docs/0012_MMC5603磁感调试过程及介绍.md) | 磁感sensor MMC5603 sensorhub调试记录

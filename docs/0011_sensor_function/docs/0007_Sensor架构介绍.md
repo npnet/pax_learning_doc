@@ -8,6 +8,8 @@ Sensor架构介绍
 
 * [嵌入式Linux驱动开发（五）——poll机制原理以及驱动实现](https://www.jianshu.com/p/8cd91b71709a)
 
+* [韦东山：Linux驱动基石之POLL机制](https://cloud.tencent.com/developer/article/1708996)
+
 ## 软件架构图
 
 ![0007_软件架构1.png](images/0007_软件架构1.png)
@@ -552,3 +554,5 @@ main() {
     }
 }
 ```
+
+![0007_poll机制原理.png](images/0007_poll机制原理.png)

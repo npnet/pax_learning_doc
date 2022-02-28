@@ -266,3 +266,13 @@ static void handleEvent(uint32_t evtType, const void* evtData)
 [7.749]ltr553_ps_set_threshold =====>
 [7.749]ps: cfg done
 ```
+
+## 功耗测试
+
+* 刚休眠功耗8.7ma：
+
+![0003_休眠功耗.png](images/0003_休眠功耗.png)
+
+* 5分钟后休眠功耗7.8ma：
+
+![0003_5分钟休眠功耗.png](images/0003_5分钟休眠功耗.png)

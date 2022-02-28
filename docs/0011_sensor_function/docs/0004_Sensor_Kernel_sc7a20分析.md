@@ -214,5 +214,26 @@ public:
 * sensorhub中定义如下：
 
 ```C++
-
+static const uint32_t accSupportedRates[] = {
+    SENSOR_HZ(5.0f),
+    SENSOR_HZ(10.0f),
+    SENSOR_HZ(16.0f),
+    SENSOR_HZ(50.0f),
+    SENSOR_HZ(100.0f),
+    SENSOR_HZ(200.0f),
+    SENSOR_HZ(400.0f),
+    0
+};
+static const uint64_t rateTimerValsAcc[] = {
+//should match "supported rates in length" and be the timer length for that rate in nanosecs
+    1000000000ULL / 5,
+    1000000000ULL / 10,
+    1000000000ULL / 16,
+    1000000000ULL / 50,
+    1000000000ULL / 100,
+    1000000000ULL / 200,
+    1000000000ULL / 400,
+};
 ```
+
+* 也就是说framework中支持的频率与sensorhub中的不匹配，上层设置15HZ下来，本来周期是66ms。而底层上报的是16hz，62ms，这样一来，两边时序不对等，poll机制可能出现超时，也就是说上层实际rate更低，那解决办法就是让两边频率设置对等，并且加上频率-时间检测，可参考`0003_抬起亮屏功能开发.md`。
