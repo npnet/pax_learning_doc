@@ -6,6 +6,7 @@ pax Android学习文档记录
 
 NO.|文件名称|摘要
 :--:|:--|:--
+0013| [项目相关问题](docs/0013_项目相关问题/README.md) | 项目相关的一些杂散问题整理
 0012| [system_stability](docs/0012_system_stability/README.md) | Android系统稳定性分析
 0011| [sensor_function](docs/0011_sensor_function/README.md) | Android各种sensor软件分析
 0010| [modem_function](docs/0010_modem_function/README.md) | modem底层分析
